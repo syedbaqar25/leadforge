@@ -44,6 +44,8 @@ export const PERMISSIONS = {
   'approval:decide': ['owner', 'admin', 'sales_manager'],
 
   // Communications
+  'communication:view': ['owner', 'admin', 'sales_manager', 'salesperson'],
+  'communication:manage': ['owner', 'admin'],
   'email:send': ['owner', 'admin', 'sales_manager', 'salesperson'],
   'email:template:manage': ['owner', 'admin', 'sales_manager'],
   'whatsapp:send': ['owner', 'admin', 'sales_manager', 'salesperson'],
