@@ -59,7 +59,7 @@ export function Sidebar() {
             <span className="text-[10px] text-foreground-secondary">Production Workspace</span>
           </div>
           <span className="inline-flex items-center gap-1 rounded-sm bg-success-subtle text-success border border-success/30 px-1.5 py-0.5 text-[10px] font-medium">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse-subtle" />
             Live
           </span>
         </div>
@@ -77,7 +77,7 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-fast',
+                  'group flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-fast active:scale-[0.98]',
                   isActive
                     ? 'bg-accent-subtle text-accent font-semibold border-l-2 border-accent'
                     : 'text-foreground-secondary hover:text-foreground hover:bg-surface-hover',
@@ -85,12 +85,14 @@ export function Sidebar() {
               >
                 <Icon
                   className={cn(
-                    'h-4 w-4 shrink-0',
+                    'h-4 w-4 shrink-0 transition-transform duration-fast group-hover:translate-x-0.5',
                     isActive ? 'text-accent' : 'text-foreground-secondary',
                   )}
                   strokeWidth={1.5}
                 />
-                <span>{item.label}</span>
+                <span className="transition-transform duration-fast group-hover:translate-x-0.5">
+                  {item.label}
+                </span>
               </Link>
             );
           })}

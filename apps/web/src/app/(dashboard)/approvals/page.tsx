@@ -114,7 +114,7 @@ export default function ApprovalsQueuePage() {
   const approvals = approvalsData?.data || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/80 pb-5">
         <div>
@@ -122,7 +122,7 @@ export default function ApprovalsQueuePage() {
             <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
               Human-in-the-Loop Approvals
             </h1>
-            <span className="inline-flex items-center gap-1 rounded-sm border border-accent/30 bg-accent-subtle px-2 py-0.5 text-xs font-semibold text-accent">
+            <span className="inline-flex items-center gap-1 rounded-sm border border-accent/30 bg-accent-subtle px-2 py-0.5 text-xs font-semibold text-accent animate-pulse-subtle">
               <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.5} />
               Safety Gate Active
             </span>
@@ -137,7 +137,7 @@ export default function ApprovalsQueuePage() {
       {/* Review List */}
       <div className="space-y-4">
         {approvals.length === 0 ? (
-          <Card className="p-12 text-center border-dashed">
+          <Card className="p-12 text-center border-dashed animate-scale-in">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-success-subtle text-success mb-3">
               <ShieldCheck className="h-6 w-6" strokeWidth={1.5} />
             </div>
@@ -154,7 +154,11 @@ export default function ApprovalsQueuePage() {
             const isEmail = req.proposedPayload?.channel === 'email';
 
             return (
-              <Card key={req.id} className="p-5 border-l-4 border-l-accent space-y-4">
+              <Card
+                interactive
+                key={req.id}
+                className="p-5 border-l-4 border-l-accent space-y-4 animate-slide-up hover:-translate-y-0.5 hover:shadow-md transition-all duration-normal"
+              >
                 {/* Request Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border/60 pb-3">
                   <div className="flex items-center gap-2.5">

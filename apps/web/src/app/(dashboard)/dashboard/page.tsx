@@ -95,7 +95,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Page Title & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/80 pb-5">
         <div>
@@ -123,16 +123,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
+      {/* KPI Cards Grid with Staggered Entrance and Micro-interactions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* KPI 1: Pipeline Value */}
-        <Card>
+        <Card interactive className="animate-slide-up stagger-1">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-foreground-secondary uppercase tracking-wider">
                 Open Pipeline
               </span>
-              <span className="p-1.5 rounded-md bg-accent-subtle text-accent">
+              <span className="p-1.5 rounded-md bg-accent-subtle text-accent transition-transform hover:scale-110 duration-fast">
                 <DollarSign className="h-4 w-4" strokeWidth={1.5} />
               </span>
             </div>
@@ -148,13 +148,13 @@ export default function DashboardPage() {
         </Card>
 
         {/* KPI 2: Won Revenue & Win Rate */}
-        <Card>
+        <Card interactive className="animate-slide-up stagger-2">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-foreground-secondary uppercase tracking-wider">
                 Won Revenue
               </span>
-              <span className="p-1.5 rounded-md bg-success-subtle text-success">
+              <span className="p-1.5 rounded-md bg-success-subtle text-success transition-transform hover:scale-110 duration-fast">
                 <Award className="h-4 w-4" strokeWidth={1.5} />
               </span>
             </div>
@@ -173,13 +173,13 @@ export default function DashboardPage() {
         </Card>
 
         {/* KPI 3: Lead Velocity */}
-        <Card>
+        <Card interactive className="animate-slide-up stagger-3">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-foreground-secondary uppercase tracking-wider">
                 Lead Velocity
               </span>
-              <span className="p-1.5 rounded-md bg-warning-subtle text-warning">
+              <span className="p-1.5 rounded-md bg-warning-subtle text-warning transition-transform hover:scale-110 duration-fast">
                 <TrendingUp className="h-4 w-4" strokeWidth={1.5} />
               </span>
             </div>
@@ -198,13 +198,13 @@ export default function DashboardPage() {
         </Card>
 
         {/* KPI 4: AI Usage & Cost */}
-        <Card>
+        <Card interactive className="animate-slide-up stagger-4">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-foreground-secondary uppercase tracking-wider">
                 AI Consumption
               </span>
-              <span className="p-1.5 rounded-md bg-accent-subtle text-accent">
+              <span className="p-1.5 rounded-md bg-accent-subtle text-accent transition-transform hover:scale-110 duration-fast">
                 <Sparkles className="h-4 w-4" strokeWidth={1.5} />
               </span>
             </div>
@@ -224,7 +224,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Priority Leads Table */}
-      <Card>
+      <Card className="animate-slide-up stagger-4">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Top Priority Opportunities</CardTitle>
@@ -234,10 +234,13 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/leads"
-            className="text-xs font-medium text-accent hover:text-accent-hover inline-flex items-center gap-1"
+            className="group text-xs font-medium text-accent hover:text-accent-hover inline-flex items-center gap-1 transition-colors"
           >
-            View all leads
-            <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+            <span>View all leads</span>
+            <ArrowUpRight
+              className="h-3.5 w-3.5 transition-transform duration-fast group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              strokeWidth={1.5}
+            />
           </Link>
         </CardHeader>
         <CardContent className="p-0">
@@ -254,7 +257,10 @@ export default function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {recentLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-surface-hover/80 transition-colors">
+                  <tr
+                    key={lead.id}
+                    className="hover:bg-surface-hover/80 hover:translate-x-0.5 transition-all duration-fast"
+                  >
                     <td className="py-3.5 px-5">
                       <div className="font-medium text-foreground">{lead.fullName}</div>
                       <div className="text-[11px] text-foreground-secondary">{lead.company}</div>

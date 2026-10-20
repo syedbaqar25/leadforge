@@ -112,7 +112,7 @@ export default function KnowledgeBasePage() {
   const documents = Array.isArray(documentsData) ? documentsData : [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/80 pb-5">
         <div>
@@ -128,11 +128,11 @@ export default function KnowledgeBasePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column: Interactive Grounded Q&A Assistant */}
-        <div className="space-y-6">
+        <div className="space-y-6 animate-slide-up stagger-1">
           <Card className="border-accent/40 shadow-xs">
             <CardHeader className="bg-accent-subtle/30">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-accent" strokeWidth={1.5} />
+                <Sparkles className="h-4 w-4 text-accent animate-pulse-subtle" strokeWidth={1.5} />
                 <CardTitle className="text-base">Grounded Knowledge Assistant</CardTitle>
               </div>
               <p className="text-xs text-foreground-secondary mt-0.5">
@@ -152,7 +152,7 @@ export default function KnowledgeBasePage() {
                     }
                   }}
                   placeholder="e.g. What are our enterprise WhatsApp limits and refund policy?"
-                  className="flex-1 px-3 py-2 text-xs bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="flex-1 px-3 py-2 text-xs bg-background border border-border rounded-md text-foreground transition-all duration-normal focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
                 />
                 <Button
                   variant="primary"
@@ -166,10 +166,10 @@ export default function KnowledgeBasePage() {
                 </Button>
               </div>
 
-              {/* AI Answer Box */}
+              {/* AI Answer Box with Scale-In Animation */}
               {aiAnswer && (
-                <div className="space-y-3 pt-2">
-                  <div className="p-4 rounded-md bg-background border border-border text-xs leading-relaxed text-foreground whitespace-pre-line">
+                <div className="space-y-3 pt-2 animate-scale-in">
+                  <div className="p-4 rounded-md bg-background border border-border text-xs leading-relaxed text-foreground whitespace-pre-line shadow-xs">
                     {aiAnswer.answer}
                   </div>
 

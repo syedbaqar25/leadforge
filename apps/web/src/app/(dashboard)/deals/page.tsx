@@ -165,7 +165,7 @@ export default function DealsKanbanPage() {
   const stages = kanbanData?.stages || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/80 pb-5">
         <div>
@@ -189,12 +189,12 @@ export default function DealsKanbanPage() {
         </div>
       </div>
 
-      {/* Kanban Board Container */}
-      <div className="flex gap-4 overflow-x-auto pb-6">
+      {/* Kanban Board Container with Custom Smooth Scroll */}
+      <div className="flex gap-4 overflow-x-auto pb-6 scroll-smooth">
         {stages.map((stage, stageIdx) => (
           <div
             key={stage.id}
-            className="w-80 shrink-0 flex flex-col rounded-lg border border-border bg-surface/60 backdrop-blur-xs"
+            className="w-80 shrink-0 flex flex-col rounded-lg border border-border bg-surface/60 backdrop-blur-xs transition-shadow duration-normal hover:shadow-sm"
           >
             {/* Stage Header */}
             <div className="p-4 border-b border-border bg-surface rounded-t-lg">
@@ -202,7 +202,7 @@ export default function DealsKanbanPage() {
                 <span className="font-display text-sm font-semibold text-foreground">
                   {stage.name}
                 </span>
-                <span className="rounded-full bg-background border border-border px-2 py-0.5 text-[11px] font-bold text-foreground-secondary tabular-nums">
+                <span className="rounded-full bg-background border border-border px-2 py-0.5 text-[11px] font-bold text-foreground-secondary tabular-nums transition-transform hover:scale-110 duration-fast">
                   {stage.dealCount}
                 </span>
               </div>
@@ -226,8 +226,9 @@ export default function DealsKanbanPage() {
 
                   return (
                     <Card
+                      interactive
                       key={deal.id}
-                      className="p-4 bg-surface hover:border-border-strong hover:shadow-sm transition-all"
+                      className="group p-4 bg-surface hover:-translate-y-1 hover:shadow-md hover:border-border-strong active:scale-[0.98] transition-all duration-normal"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="text-xs font-semibold text-foreground leading-snug">
@@ -264,7 +265,7 @@ export default function DealsKanbanPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 px-2 text-[11px] hover:text-accent hover:bg-accent-subtle"
+                            className="group/btn h-7 px-2 text-[11px] hover:text-accent hover:bg-accent-subtle active:scale-95"
                             onClick={() =>
                               moveDealMutation.mutate({
                                 dealId: deal.id,
@@ -275,7 +276,10 @@ export default function DealsKanbanPage() {
                             title={`Move to ${nextStage.name}`}
                           >
                             <span>Move</span>
-                            <ChevronRight className="h-3 w-3" strokeWidth={1.5} />
+                            <ChevronRight
+                              className="h-3 w-3 transition-transform duration-fast group-hover/btn:translate-x-0.5"
+                              strokeWidth={1.5}
+                            />
                           </Button>
                         ) : null}
                       </div>

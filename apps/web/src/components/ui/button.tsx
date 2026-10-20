@@ -21,7 +21,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-colors duration-normal focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-50 disabled:pointer-events-none rounded-md select-none';
+      'inline-flex items-center justify-center font-medium transition-all duration-normal ease-out focus:outline-none focus:ring-2 focus:ring-accent/40 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none disabled:transform-none rounded-md select-none cursor-pointer';
 
     const sizeStyles = {
       sm: 'px-2.5 py-1 text-xs gap-1.5',
@@ -30,11 +30,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const variantStyles = {
-      primary: 'bg-accent text-white hover:bg-accent-hover shadow-sm',
-      secondary: 'bg-surface-hover text-foreground hover:bg-border/60 border border-border',
-      outline: 'border border-border bg-surface text-foreground hover:bg-surface-hover',
+      primary:
+        'bg-accent text-white hover:bg-accent-hover hover:-translate-y-0.5 active:translate-y-0 shadow-sm hover:shadow',
+      secondary:
+        'bg-surface-hover text-foreground hover:bg-border/60 hover:-translate-y-0.5 active:translate-y-0 border border-border',
+      outline:
+        'border border-border bg-surface text-foreground hover:bg-surface-hover hover:border-border-strong hover:-translate-y-0.5 active:translate-y-0',
       ghost: 'bg-transparent text-foreground hover:bg-surface-hover',
-      danger: 'bg-danger text-white hover:bg-danger/90',
+      danger:
+        'bg-danger text-white hover:bg-danger/90 hover:-translate-y-0.5 active:translate-y-0 shadow-sm hover:shadow',
     };
 
     return (

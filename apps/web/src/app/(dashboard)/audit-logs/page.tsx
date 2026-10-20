@@ -103,7 +103,7 @@ export default function AuditLogsPage() {
       {/* Filter */}
       <div className="relative w-full sm:w-80">
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-secondary"
+          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-secondary transition-colors"
           strokeWidth={1.5}
         />
         <input
@@ -111,12 +111,12 @@ export default function AuditLogsPage() {
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
           placeholder="Filter by action name (e.g. lead.create)..."
-          className="w-full pl-9 pr-3 py-1.5 text-xs bg-surface border border-border rounded-md text-foreground placeholder:text-foreground-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
+          className="w-full pl-9 pr-3 py-1.5 text-xs bg-surface border border-border rounded-md text-foreground placeholder:text-foreground-tertiary transition-all duration-normal focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
         />
       </div>
 
       {/* Audit Log Table */}
-      <Card>
+      <Card className="animate-slide-up stagger-1">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -132,7 +132,10 @@ export default function AuditLogsPage() {
               </thead>
               <tbody className="divide-y divide-border/60 font-mono text-[11px]">
                 {logs.map((log: any) => (
-                  <tr key={log.id} className="hover:bg-surface-hover/80 transition-colors">
+                  <tr
+                    key={log.id}
+                    className="hover:bg-surface-hover/80 hover:translate-x-0.5 transition-all duration-fast"
+                  >
                     <td className="py-3 px-5 text-foreground-secondary">
                       {new Date(log.createdAt).toISOString().replace('T', ' ').substring(0, 19)}
                     </td>

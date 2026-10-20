@@ -94,7 +94,7 @@ export default function AnalyticsReportingPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/80 pb-5">
         <div>
@@ -111,10 +111,13 @@ export default function AnalyticsReportingPage() {
       {/* Grid: Conversion by Source & Pipeline Funnel */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Lead Conversion by Source */}
-        <Card>
+        <Card interactive className="animate-slide-up stagger-1">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-accent" strokeWidth={1.5} />
+              <TrendingUp
+                className="h-4 w-4 text-accent transition-transform hover:scale-110 duration-fast"
+                strokeWidth={1.5}
+              />
               <CardTitle className="text-base">Lead Conversion by Acquisition Channel</CardTitle>
             </div>
             <p className="text-xs text-foreground-secondary mt-0.5">
@@ -134,7 +137,10 @@ export default function AnalyticsReportingPage() {
                 </thead>
                 <tbody className="divide-y divide-border/60">
                   {leadAnalytics?.bySource?.map((src: any) => (
-                    <tr key={src.source} className="hover:bg-surface-hover/80 transition-colors">
+                    <tr
+                      key={src.source}
+                      className="hover:bg-surface-hover/80 hover:translate-x-0.5 transition-all duration-fast"
+                    >
                       <td className="py-3 px-4 font-semibold text-foreground">{src.source}</td>
                       <td className="py-3 px-3 text-right font-mono tabular-nums text-foreground">
                         {src.total}

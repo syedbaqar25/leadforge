@@ -69,6 +69,35 @@ const config: Config = {
       spacing: {
         sidebar: 'var(--sidebar-width)',
       },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideDown: {
+          '0%': { opacity: '0', transform: 'translateY(-8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.97)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        pulseSubtle: {
+          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+          '50%': { opacity: '0.45', transform: 'scale(0.88)' },
+        },
+      },
+      animation: {
+        'fade-in': 'fadeIn 180ms ease-out forwards',
+        'slide-up': 'slideUp 220ms ease-out forwards',
+        'slide-down': 'slideDown 220ms ease-out forwards',
+        'scale-in': 'scaleIn 180ms ease-out forwards',
+        'pulse-subtle': 'pulseSubtle 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
     },
   },
   plugins: [require('@tailwindcss/typography')],

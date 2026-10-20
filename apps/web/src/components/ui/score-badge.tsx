@@ -25,7 +25,7 @@ export function ScoreBadge({ band, score, className, showScore = true }: ScoreBa
       return (
         <span
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-sm border border-danger/30 bg-danger-subtle px-2 py-0.5 text-xs font-semibold text-danger tabular-nums',
+            'inline-flex items-center gap-1.5 rounded-sm border border-danger/30 bg-danger-subtle px-2 py-0.5 text-xs font-semibold text-danger tabular-nums transition-transform duration-fast hover:scale-105 active:scale-95 cursor-default select-none',
             className,
           )}
           title={`Score: ${score ?? 75}+ (Hot Lead)`}
@@ -42,7 +42,7 @@ export function ScoreBadge({ band, score, className, showScore = true }: ScoreBa
       return (
         <span
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-sm border border-warning/30 bg-warning-subtle px-2 py-0.5 text-xs font-semibold text-warning tabular-nums',
+            'inline-flex items-center gap-1.5 rounded-sm border border-warning/30 bg-warning-subtle px-2 py-0.5 text-xs font-semibold text-warning tabular-nums transition-transform duration-fast hover:scale-105 active:scale-95 cursor-default select-none',
             className,
           )}
           title={`Score: ${score ?? 40}-74 (Warm Lead)`}
@@ -60,7 +60,7 @@ export function ScoreBadge({ band, score, className, showScore = true }: ScoreBa
       return (
         <span
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-sm border border-info/30 bg-info-subtle px-2 py-0.5 text-xs font-semibold text-info tabular-nums',
+            'inline-flex items-center gap-1.5 rounded-sm border border-info/30 bg-info-subtle px-2 py-0.5 text-xs font-semibold text-info tabular-nums transition-transform duration-fast hover:scale-105 active:scale-95 cursor-default select-none',
             className,
           )}
           title={`Score: ${score ?? 0}-39 (Cold Lead)`}

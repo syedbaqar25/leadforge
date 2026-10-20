@@ -43,11 +43,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-6 selection:bg-accent/20 selection:text-accent">
+    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-6 selection:bg-accent/20 selection:text-accent animate-fade-in">
       <div className="w-full max-w-md space-y-6">
         {/* Header Branding */}
         <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-white font-display font-bold text-2xl shadow-sm">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-white font-display font-bold text-2xl shadow-sm transition-transform duration-fast hover:scale-105 active:scale-95 cursor-default select-none">
             L
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
@@ -58,8 +58,8 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Login Card */}
-        <Card className="p-6">
+        {/* Login Card with Entrance Pop */}
+        <Card className="p-6 animate-scale-in">
           <form onSubmit={handleLogin} className="space-y-4 text-xs">
             <div>
               <label className="block font-semibold text-foreground mb-1">Email Address</label>
@@ -69,14 +69,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground transition-all duration-normal focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent text-xs"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="font-semibold text-foreground">Password</label>
-                <a href="#" className="text-[11px] text-accent hover:underline">
+                <a href="#" className="text-[11px] text-accent hover:underline transition-colors">
                   Forgot password?
                 </a>
               </div>
@@ -86,7 +86,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground transition-all duration-normal focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent text-xs"
               />
             </div>
 
