@@ -1,0 +1,81 @@
+# ==============================================================================
+# Leadforge - Web Application Dockerfile (Next.js)
+# Multi-stage production build with Next.js standalone output
+# ==============================================================================
+
+# --- Stage 1: Dependencies ---
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+
+# Copy root manifest and workspace configuration
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+
+# Copy package manifests for workspace resolution
+COPY apps/web/package.json ./apps/web/
+COPY packages/shared/package.json ./packages/shared/
+
+# Install dependencies with frozen lockfile
+RUN pnpm install --frozen-lockfile
+
+# --- Stage 2: Build ---
+FROM node:20-alpine AS builder
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+
+# Copy workspace source files
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.json ./
+COPY packages/shared ./packages/shared
+COPY apps/web ./apps/web
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+# Build shared package if build script exists, then build Next.js application
+RUN pnpm --filter @leadforge/shared build 2>/dev/null || true
+RUN pnpm --filter @leadforge/web build
+
+# Monorepo standalone compatibility: ensure server.js is available at root of standalone
+RUN if [ -d "/app/apps/web/.next/standalone/apps/web" ]; then \
+      cp -r /app/apps/web/.next/standalone/apps/web/* /app/apps/web/.next/standalone/ 2>/dev/null || true; \
+    fi
+
+# --- Stage 3: Production Runner ---
+FROM node:20-alpine AS runner
+RUN apk add --no-cache wget dumb-init
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Security: non-root user
+USER node
+
+# Copy public static assets and standalone build output
+COPY --chown=node:node --from=builder /app/apps/web/public ./public
+COPY --chown=node:node --from=builder /app/apps/web/.next/standalone ./
+COPY --chown=node:node --from=builder /app/apps/web/.next/static ./.next/static
+COPY --chown=node:node --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["node", "server.js"]

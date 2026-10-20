@@ -1,0 +1,9 @@
+# ==============================================================================
+# Leadforge - Code Owners
+# ==============================================================================
+# Global fallback owner
+* @sayedbaqarabbas
+
+# Security & CI workflows
+/.github/ @sayedbaqarabbas
+/docker/ @sayedbaqarabbas

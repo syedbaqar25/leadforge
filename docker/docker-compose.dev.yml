@@ -1,0 +1,101 @@
+# ==============================================================================
+# Leadforge - Local Development Infrastructure Stack
+#
+# DEV ONLY CREDENTIALS:
+# The credentials, passwords, and tokens below are intended strictly for local
+# offline development and automated testing environments.
+# NEVER use these credentials or configurations in production environments!
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # --- PostgreSQL 16 with pgvector extension ---
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: leadforge-postgres-dev
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5432:5432'
+    environment:
+      POSTGRES_DB: leadforge
+      POSTGRES_USER: leadforge
+      POSTGRES_PASSWORD: leadforge_dev_only_not_for_prod # DEV ONLY - DO NOT USE IN PRODUCTION
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U leadforge -d leadforge']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - leadforge-dev
+
+  # --- Redis 7 (In-memory store & BullMQ queue backend) ---
+  redis:
+    image: redis:7-alpine
+    container_name: leadforge-redis-dev
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - ./data/redis:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - leadforge-dev
+
+  # --- Mailpit (Local SMTP server and web inbox for transactional email testing) ---
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: leadforge-mailpit-dev
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:1025:1025' # SMTP port
+      - '127.0.0.1:8025:8025' # Web UI port
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_DATABASE: '' # In-memory storage for development
+    networks:
+      - leadforge-dev
+
+  # --- n8n (Workflow Automation Platform) ---
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: leadforge-n8n-dev
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5678:5678'
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin # DEV ONLY - DO NOT USE IN PRODUCTION
+      - N8N_BASIC_AUTH_PASSWORD=leadforge_dev_only # DEV ONLY - DO NOT USE IN PRODUCTION
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=leadforge
+      - DB_POSTGRESDB_USER=leadforge
+      - DB_POSTGRESDB_PASSWORD=leadforge_dev_only_not_for_prod
+      - DB_POSTGRESDB_SCHEMA=n8n
+      - EXECUTIONS_MODE=regular
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - GENERIC_TIMEZONE=UTC
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - leadforge-dev
+
+networks:
+  leadforge-dev:
+    name: leadforge-dev
+    driver: bridge

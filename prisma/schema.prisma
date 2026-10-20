@@ -1,0 +1,1352 @@
+// Leadforge Multi-Tenant SaaS CRM Prisma Schema
+// Production-grade PostgreSQL schema with pgvector extension
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserStatus {
+  active
+  suspended
+  deleted
+}
+
+enum Role {
+  owner
+  admin
+  sales_manager
+  salesperson
+}
+
+enum LeadStatus {
+  new
+  contacted
+  qualified
+  unqualified
+  nurturing
+  converted
+  lost
+}
+
+enum Priority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum ScoreBand {
+  hot
+  warm
+  cold
+}
+
+enum CustomFieldType {
+  text
+  number
+  date
+  select
+}
+
+enum DuplicateStatus {
+  pending
+  merged
+  dismissed
+}
+
+enum StageType {
+  open
+  won
+  lost
+}
+
+enum ActivityType {
+  note
+  email_sent
+  email_received
+  call
+  meeting
+  status_change
+  field_change
+  assignment
+  score_change
+  deal_created
+  deal_moved
+  task_created
+  task_completed
+  import
+  merge
+  system
+}
+
+enum TaskType {
+  call
+  meeting
+  email
+  demo
+  follow_up
+}
+
+enum AiAnalysisType {
+  qualification
+  summary
+  extraction
+  requirements
+  objections
+}
+
+enum SuggestionStatus {
+  pending
+  accepted
+  edited
+  rejected
+}
+
+enum DocStatus {
+  uploading
+  processing
+  ready
+  failed
+}
+
+enum Provider {
+  gmail
+  whatsapp
+}
+
+enum AccountStatus {
+  active
+  expired
+  revoked
+  error
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+enum MessageChannel {
+  email
+  whatsapp
+}
+
+enum MessageStatus {
+  draft
+  pending_approval
+  approved
+  sending
+  sent
+  delivered
+  read
+  failed
+  bounced
+}
+
+enum ExecutionStatus {
+  pending
+  running
+  completed
+  failed
+  dead_letter
+}
+
+enum StepStatus {
+  pending
+  running
+  completed
+  failed
+  skipped
+}
+
+enum OutboxStatus {
+  pending
+  dispatched
+  failed
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
+  cancelled
+  expired
+}
+
+enum ImportStatus {
+  pending
+  validating
+  processing
+  completed
+  failed
+  cancelled
+}
+
+enum SubscriptionStatus {
+  active
+  past_due
+  cancelled
+  trialing
+}
+
+// ---------------------------------------------------------------------------
+// Multi-Tenant Core Models
+// ---------------------------------------------------------------------------
+
+/// 1. Organization - root tenant entity
+model Organization {
+  id         String   @id @default(uuid())
+  name       String
+  slug       String   @unique
+  settings   Json     @default("{}")
+  timezone   String   @default("Asia/Kolkata")
+  currency   String   @default("INR")
+  aiEnabled  Boolean  @default(true)
+  logoUrl    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Tenant collections
+  memberships             Membership[]
+  invitations             Invitation[]
+  apiKeys                 ApiKey[]
+  leads                   Lead[]
+  customFieldDefinitions  CustomFieldDefinition[]
+  tags                    Tag[]
+  duplicateCandidates     DuplicateCandidate[]
+  pipelines               Pipeline[]
+  deals                   Deal[]
+  activities              Activity[]
+  tasks                   Task[]
+  notes                   Note[]
+  scoringRuleSets         ScoringRuleSet[]
+  aiAnalyses              AiAnalysis[]
+  aiSuggestions           AiSuggestion[]
+  knowledgeDocuments      KnowledgeDocument[]
+  knowledgeChunks         KnowledgeChunk[]
+  communicationAccounts   CommunicationAccount[]
+  emailThreads            EmailThread[]
+  messages                Message[]
+  messageTemplates        MessageTemplate[]
+  consentRecords          ConsentRecord[]
+  suppressionEntries      SuppressionEntry[]
+  workflowDefinitions     WorkflowDefinition[]
+  workflowExecutions      WorkflowExecution[]
+  outboxEvents            OutboxEvent[]
+  approvalRequests        ApprovalRequest[]
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  auditLogs               AuditLog[]
+  importJobs              ImportJob[]
+  usageCounters           UsageCounter[]
+  subscription            Subscription?
+  billingEvents           BillingEvent[]
+
+  @@index([slug])
+}
+
+/// 2. User - system-wide identity with tenant memberships
+model User {
+  id                String      @id @default(uuid())
+  email             String      @unique
+  emailVerified     Boolean     @default(false)
+  emailVerifyToken  String?
+  emailVerifyExpiry DateTime?
+  passwordHash      String
+  name              String
+  avatarUrl         String?
+  status            UserStatus  @default(active)
+  lastLoginAt       DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  memberships               Membership[]
+  sessions                  Session[]
+  invitationsSent           Invitation[]             @relation("InvitedByUser")
+  apiKeys                   ApiKey[]                 @relation("ApiKeyCreatedByUser")
+  assignedLeads             Lead[]                   @relation("AssignedLeads")
+  resolvedDuplicates        DuplicateCandidate[]     @relation("ResolvedDuplicates")
+  ownedDeals                Deal[]                   @relation("OwnedDeals")
+  stageMovements            DealStageHistory[]       @relation("StageMovedByUser")
+  activities                Activity[]               @relation("ActivityPerformedByUser")
+  assignedTasks             Task[]                   @relation("TaskAssignedTo")
+  createdTasks              Task[]                   @relation("TaskCreatedBy")
+  notes                     Note[]                   @relation("NoteAuthor")
+  scoringRuleSets           ScoringRuleSet[]         @relation("RuleCreatedBy")
+  createdSuggestions         AiSuggestion[]           @relation("SuggestionCreatedBy")
+  reviewedSuggestions        AiSuggestion[]           @relation("SuggestionReviewedBy")
+  uploadedDocuments         KnowledgeDocument[]      @relation("DocumentUploadedBy")
+  communicationAccounts     CommunicationAccount[]
+  createdMessages           Message[]                @relation("MessageCreatedBy")
+  createdTemplates          MessageTemplate[]        @relation("TemplateCreatedBy")
+  createdSuppressionEntries SuppressionEntry[]       @relation("SuppressionCreatedBy")
+  createdWorkflows          WorkflowDefinition[]     @relation("WorkflowCreatedBy")
+  requestedApprovals        ApprovalRequest[]        @relation("ApprovalRequestedBy")
+  reviewedApprovals         ApprovalRequest[]        @relation("ApprovalReviewedBy")
+  notifications             Notification[]
+  notificationPreferences   NotificationPreference[]
+  auditLogs                 AuditLog[]               @relation("AuditLogUser")
+  createdImportJobs         ImportJob[]              @relation("ImportJobCreatedBy")
+
+  @@index([email])
+}
+
+/// 3. Membership - user tenancy link with RBAC
+model Membership {
+  id             String       @id @default(uuid())
+  userId         String
+  organizationId String
+  role           Role
+  permissions    Json?
+  joinedAt       DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, role])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+/// 4. Session - user auth refresh token family
+model Session {
+  id               String    @id @default(uuid())
+  userId           String
+  refreshTokenHash String
+  family           String    @default(uuid())
+  ipAddress        String?
+  userAgent        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([refreshTokenHash])
+  @@index([family])
+}
+
+/// 5. Invitation - org invitation token
+model Invitation {
+  id             String       @id @default(uuid())
+  organizationId String
+  email          String
+  role           Role
+  tokenHash      String       @unique
+  invitedById    String
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("InvitedByUser", fields: [invitedById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, email])
+  @@index([invitedById])
+  @@index([organizationId])
+}
+
+/// 6. ApiKey - scoped developer/service access key
+model ApiKey {
+  id             String       @id @default(uuid())
+  organizationId String
+  keyHash        String       @unique
+  keyPrefix      String
+  name           String
+  scopes         String[]
+  lastUsedAt     DateTime?
+  revokedAt      DateTime?
+  createdById    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("ApiKeyCreatedByUser", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, keyPrefix])
+  @@index([createdById])
+  @@index([organizationId])
+}
+
+// ---------------------------------------------------------------------------
+// Lead Management Models
+// ---------------------------------------------------------------------------
+
+/// 7. Lead - core CRM entity with AI scoring and soft delete
+model Lead {
+  id               String       @id @default(uuid())
+  organizationId   String
+  fullName         String
+  emailRaw         String?
+  emailNormalized  String?
+  phoneRaw         String?
+  phoneNormalized  String?
+  company          String?
+  jobTitle         String?
+  website          String?
+  location         String?
+  industry         String?
+  source           String?
+  campaign         String?
+  budgetAmount     Decimal?     @db.Decimal(15, 2)
+  budgetCurrency   String       @default("INR")
+  requirements     String?      @db.Text
+  purchaseTimeline String?
+  status           LeadStatus   @default(new)
+  priority         Priority     @default(medium)
+  assignedToId     String?
+  score            Int          @default(0)
+  scoreBand        ScoreBand    @default(cold)
+  tags             String[]
+  nextFollowUpAt   DateTime?
+  lastContactedAt  DateTime?
+  deletedAt        DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  organization         Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedTo           User?                @relation("AssignedLeads", fields: [assignedToId], references: [id], onDelete: SetNull)
+  customFieldValues    CustomFieldValue[]
+  leadTags             LeadTag[]
+  duplicateCandidatesA DuplicateCandidate[] @relation("DuplicateLeadA")
+  duplicateCandidatesB DuplicateCandidate[] @relation("DuplicateLeadB")
+  deals                Deal[]
+  activities           Activity[]
+  tasks                Task[]
+  notes                Note[]
+  scoreHistories       LeadScoreHistory[]
+  aiAnalyses           AiAnalysis[]
+  aiSuggestions        AiSuggestion[]
+  emailThreads         EmailThread[]
+  messages             Message[]
+  consentRecords       ConsentRecord[]
+
+  // Deduplication index per org. Note: In PostgreSQL migration, this is reinforced as
+  // CREATE UNIQUE INDEX "Lead_org_email_unique" ON "Lead"("organizationId", "emailNormalized") WHERE "deletedAt" IS NULL;
+  @@unique([organizationId, emailNormalized])
+  @@index([organizationId, status])
+  @@index([organizationId, score])
+  @@index([organizationId, assignedToId])
+  @@index([organizationId, source])
+  @@index([organizationId, createdAt])
+  @@index([organizationId, deletedAt])
+  @@index([assignedToId])
+  @@index([organizationId])
+}
+
+/// 8. CustomFieldDefinition - schema definition for custom org fields
+model CustomFieldDefinition {
+  id             String          @id @default(uuid())
+  organizationId String
+  name           String
+  fieldType      CustomFieldType
+  options        Json?
+  required       Boolean         @default(false)
+  sortOrder      Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  values       CustomFieldValue[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+/// 9. CustomFieldValue - dynamic lead attribute values
+model CustomFieldValue {
+  id           String   @id @default(uuid())
+  leadId       String
+  definitionId String
+  value        String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  lead       Lead                  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  definition CustomFieldDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, definitionId])
+  @@index([leadId])
+  @@index([definitionId])
+}
+
+/// 10. Tag - organization-scoped lead tags
+model Tag {
+  id             String    @id @default(uuid())
+  organizationId String
+  name           String
+  color          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadTags     LeadTag[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+/// 11. LeadTag - junction table for leads and tags
+model LeadTag {
+  leadId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([leadId, tagId])
+  @@index([leadId])
+  @@index([tagId])
+}
+
+/// 12. DuplicateCandidate - AI / rule detected duplicate pairs
+model DuplicateCandidate {
+  id             String          @id @default(uuid())
+  organizationId String
+  leadAId        String
+  leadBId        String
+  confidence     Float
+  matchingFields Json
+  status         DuplicateStatus @default(pending)
+  resolvedById   String?
+  resolvedAt     DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadA        Lead         @relation("DuplicateLeadA", fields: [leadAId], references: [id], onDelete: Cascade)
+  leadB        Lead         @relation("DuplicateLeadB", fields: [leadBId], references: [id], onDelete: Cascade)
+  resolvedBy   User?        @relation("ResolvedDuplicates", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@unique([leadAId, leadBId])
+  @@index([organizationId, status])
+  @@index([organizationId])
+  @@index([leadAId])
+  @@index([leadBId])
+  @@index([resolvedById])
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline & Deal Models
+// ---------------------------------------------------------------------------
+
+/// 13. Pipeline - sales pipeline definition
+model Pipeline {
+  id             String          @id @default(uuid())
+  organizationId String
+  name           String
+  isDefault      Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  stages       PipelineStage[]
+  deals        Deal[]
+
+  @@index([organizationId, isDefault])
+  @@index([organizationId])
+}
+
+/// 14. PipelineStage - individual pipeline stages
+model PipelineStage {
+  id             String             @id @default(uuid())
+  pipelineId     String
+  name           String
+  sortOrder      Int
+  stageType      StageType          @default(open)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  pipeline       Pipeline           @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  deals          Deal[]
+  fromHistories  DealStageHistory[] @relation("FromStage")
+  toHistories    DealStageHistory[] @relation("ToStage")
+
+  @@unique([pipelineId, sortOrder])
+  @@index([pipelineId])
+}
+
+/// 15. Deal - revenue opportunity with optimistic locking and soft delete
+model Deal {
+  id                String             @id @default(uuid())
+  organizationId    String
+  leadId            String
+  pipelineId        String
+  stageId           String
+  title             String
+  value             Decimal?           @db.Decimal(15, 2)
+  currency          String             @default("INR")
+  expectedCloseDate DateTime?
+  ownerId           String?
+  probability       Int?
+  nextAction        String?
+  winLossReason     String?            @db.Text
+  version           Int                @default(1)
+  closedAt          DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  pipeline     Pipeline           @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
+  stage        PipelineStage      @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  owner        User?              @relation("OwnedDeals", fields: [ownerId], references: [id], onDelete: SetNull)
+  stageHistory DealStageHistory[]
+  activities   Activity[]
+  tasks        Task[]
+
+  @@index([organizationId, stageId])
+  @@index([organizationId, ownerId])
+  @@index([organizationId, expectedCloseDate])
+  @@index([organizationId, leadId])
+  @@index([organizationId, deletedAt])
+  @@index([leadId])
+  @@index([pipelineId])
+  @@index([stageId])
+  @@index([ownerId])
+  @@index([organizationId])
+}
+
+/// 16. DealStageHistory - audit trail of stage transitions
+model DealStageHistory {
+  id          String         @id @default(uuid())
+  dealId      String
+  fromStageId String?
+  toStageId   String
+  movedById   String
+  movedAt     DateTime       @default(now())
+
+  deal      Deal           @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  fromStage PipelineStage? @relation("FromStage", fields: [fromStageId], references: [id], onDelete: SetNull)
+  toStage   PipelineStage  @relation("ToStage", fields: [toStageId], references: [id], onDelete: Restrict)
+  movedBy   User           @relation("StageMovedByUser", fields: [movedById], references: [id], onDelete: Restrict)
+
+  @@index([dealId, movedAt])
+  @@index([dealId])
+  @@index([fromStageId])
+  @@index([toStageId])
+  @@index([movedById])
+}
+
+// ---------------------------------------------------------------------------
+// Engagement Models (Activity, Task, Note)
+// ---------------------------------------------------------------------------
+
+/// 17. Activity - immutable event log of customer interactions and changes
+model Activity {
+  id             String       @id @default(uuid())
+  organizationId String
+  leadId         String?
+  dealId         String?
+  activityType   ActivityType
+  description    String       @db.Text
+  metadata       Json?
+  performedById  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal         Deal?        @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  performedBy  User?        @relation("ActivityPerformedByUser", fields: [performedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, leadId, createdAt])
+  @@index([organizationId, dealId, createdAt])
+  @@index([organizationId, activityType])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([performedById])
+  @@index([organizationId])
+}
+
+/// 18. Task - scheduled action items and follow-ups
+model Task {
+  id             String       @id @default(uuid())
+  organizationId String
+  leadId         String?
+  dealId         String?
+  taskType       TaskType
+  title          String
+  description    String?      @db.Text
+  assignedToId   String
+  dueAt          DateTime
+  completedAt    DateTime?
+  cancelledAt    DateTime?
+  outcome        String?      @db.Text
+  priority       Priority     @default(medium)
+  idempotencyKey String?      @unique
+  createdById    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal         Deal?        @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  assignedTo   User         @relation("TaskAssignedTo", fields: [assignedToId], references: [id], onDelete: Restrict)
+  createdBy    User         @relation("TaskCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, assignedToId, dueAt])
+  @@index([organizationId, dueAt])
+  @@index([assignedToId])
+  @@index([createdById])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([organizationId])
+}
+
+/// 19. Note - rich content notes tied to leads
+model Note {
+  id             String       @id @default(uuid())
+  organizationId String
+  leadId         String
+  authorId       String
+  content        String       @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  author       User         @relation("NoteAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, leadId, createdAt])
+  @@index([leadId])
+  @@index([authorId])
+  @@index([organizationId])
+}
+
+// ---------------------------------------------------------------------------
+// AI & Scoring Models
+// ---------------------------------------------------------------------------
+
+/// 20. ScoringRuleSet - versioned scoring criteria configuration
+model ScoringRuleSet {
+  id             String       @id @default(uuid())
+  organizationId String
+  version        Int
+  rules          Json
+  isActive       Boolean      @default(false)
+  createdById    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("RuleCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, version])
+  @@index([organizationId, isActive])
+  @@index([createdById])
+  @@index([organizationId])
+}
+
+/// 21. LeadScoreHistory - historical audit log of calculated scores
+model LeadScoreHistory {
+  id              String    @id @default(uuid())
+  leadId          String
+  score           Int
+  band            ScoreBand
+  ruleSetVersion  Int
+  factors         Json
+  inputHash       String?
+  modelName       String?
+  createdAt       DateTime  @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@index([leadId])
+}
+
+/// 22. AiAnalysis - LLM-powered lead analysis and token accounting
+model AiAnalysis {
+  id               String         @id @default(uuid())
+  organizationId   String
+  leadId           String
+  analysisType     AiAnalysisType
+  result           Json
+  modelName        String
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  costCents        Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, leadId])
+  @@index([organizationId, analysisType])
+  @@index([leadId])
+  @@index([organizationId])
+}
+
+/// 23. AiSuggestion - actionable AI recommendations requiring human review
+model AiSuggestion {
+  id             String           @id @default(uuid())
+  organizationId String
+  leadId         String?
+  suggestionType String
+  content        Json
+  status         SuggestionStatus @default(pending)
+  feedback       String?          @db.Text
+  createdById    String
+  reviewedById   String?
+  reviewedAt     DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("SuggestionCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  reviewedBy   User?        @relation("SuggestionReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([organizationId, leadId])
+  @@index([leadId])
+  @@index([createdById])
+  @@index([reviewedById])
+  @@index([organizationId])
+}
+
+/// 24. KnowledgeDocument - source document for RAG pipeline
+model KnowledgeDocument {
+  id             String          @id @default(uuid())
+  organizationId String
+  filename       String
+  originalName   String
+  mimeType       String
+  storageKey     String
+  sizeBytes      Int
+  status         DocStatus       @default(uploading)
+  error          String?         @db.Text
+  uploadedById   String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  uploadedBy   User             @relation("DocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  chunks       KnowledgeChunk[]
+
+  @@index([organizationId, status])
+  @@index([uploadedById])
+  @@index([organizationId])
+}
+
+/// 25. KnowledgeChunk - embedded vector chunks for semantic retrieval
+model KnowledgeChunk {
+  id             String                                 @id @default(uuid())
+  documentId     String
+  organizationId String
+  content        String                                 @db.Text
+  embedding      Unsupported("vector(1536)")?
+  metadata       Json?
+  chunkIndex     Int
+  createdAt      DateTime                               @default(now())
+  updatedAt      DateTime                               @updatedAt
+
+  document     KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([documentId])
+}
+
+// ---------------------------------------------------------------------------
+// Communication & Messaging Models
+// ---------------------------------------------------------------------------
+
+/// 26. CommunicationAccount - connected OAuth/API accounts (Gmail, WhatsApp)
+model CommunicationAccount {
+  id                    String        @id @default(uuid())
+  organizationId        String
+  userId                String
+  provider              Provider
+  providerAccountId     String?
+  encryptedAccessToken  String?       @db.Text
+  encryptedRefreshToken String?       @db.Text
+  encryptionKeyId       String?
+  tokenExpiresAt        DateTime?
+  scopes                String[]
+  status                AccountStatus @default(active)
+  syncCursor            String?
+  lastSyncAt            DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId, provider])
+  @@index([organizationId, provider])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+/// 27. EmailThread - grouped messages linked to leads
+model EmailThread {
+  id               String    @id @default(uuid())
+  organizationId   String
+  leadId           String?
+  providerThreadId String?
+  subject          String?
+  lastMessageAt    DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  messages     Message[]
+
+  @@index([organizationId, leadId])
+  @@index([organizationId, providerThreadId])
+  @@index([leadId])
+  @@index([organizationId])
+}
+
+/// 28. Message - individual email or WhatsApp transmission
+model Message {
+  id                String           @id @default(uuid())
+  organizationId    String
+  threadId          String?
+  leadId            String?
+  direction         MessageDirection
+  channel           MessageChannel
+  providerMessageId String?
+  fromAddress       String
+  toAddress         String
+  subject           String?
+  bodyPreview       String?          @db.Text
+  status            MessageStatus    @default(draft)
+  sentAt            DateTime?
+  metadata          Json?
+  createdById       String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  thread       EmailThread? @relation(fields: [threadId], references: [id], onDelete: SetNull)
+  lead         Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation("MessageCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([channel, providerMessageId])
+  @@index([organizationId, leadId, createdAt])
+  @@index([organizationId, status])
+  @@index([threadId])
+  @@index([leadId])
+  @@index([createdById])
+  @@index([organizationId])
+}
+
+/// 29. MessageTemplate - reusable approved message templates
+model MessageTemplate {
+  id               String         @id @default(uuid())
+  organizationId   String
+  name             String
+  channel          MessageChannel
+  subject          String?
+  body             String         @db.Text
+  variables        String[]
+  requiresApproval Boolean        @default(true)
+  isActive         Boolean        @default(true)
+  createdById      String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("TemplateCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, name])
+  @@index([organizationId, channel])
+  @@index([createdById])
+  @@index([organizationId])
+}
+
+/// 30. ConsentRecord - compliance consent tracking per lead and channel
+model ConsentRecord {
+  id             String    @id @default(uuid())
+  organizationId String
+  leadId         String
+  channel        String
+  consentGiven   Boolean
+  consentMethod  String?
+  consentDate    DateTime
+  withdrawnAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, leadId])
+  @@index([organizationId, channel])
+  @@index([leadId])
+  @@index([organizationId])
+}
+
+/// 31. SuppressionEntry - blacklist and opt-out suppression lists
+model SuppressionEntry {
+  id             String    @id @default(uuid())
+  organizationId String
+  channel        String
+  identifier     String
+  reason         String
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation("SuppressionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, channel, identifier])
+  @@index([organizationId, identifier])
+  @@index([createdById])
+  @@index([organizationId])
+}
+
+// ---------------------------------------------------------------------------
+// Workflow & Automation Models
+// ---------------------------------------------------------------------------
+
+/// 32. WorkflowDefinition - tenant workflow builder definition
+model WorkflowDefinition {
+  id               String            @id @default(uuid())
+  organizationId   String
+  name             String
+  description      String?           @db.Text
+  isEnabled        Boolean           @default(false)
+  testMode         Boolean           @default(true)
+  concurrencyLimit Int               @default(5)
+  createdById      String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User              @relation("WorkflowCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  versions     WorkflowVersion[]
+
+  @@index([organizationId, isEnabled])
+  @@index([createdById])
+  @@index([organizationId])
+}
+
+/// 33. WorkflowVersion - immutable versioned DAG and steps configuration
+model WorkflowVersion {
+  id         String   @id @default(uuid())
+  workflowId String
+  version    Int
+  trigger    Json
+  conditions Json
+  actions    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  workflow   WorkflowDefinition  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  executions WorkflowExecution[]
+
+  @@unique([workflowId, version])
+  @@index([workflowId])
+}
+
+/// 34. WorkflowExecution - run state of a triggered workflow version
+model WorkflowExecution {
+  id                String                  @id @default(uuid())
+  organizationId    String
+  workflowVersionId String
+  triggerEventId    String
+  status            ExecutionStatus         @default(pending)
+  startedAt         DateTime                @default(now())
+  completedAt       DateTime?
+  error             String?                 @db.Text
+  retryCount        Int                     @default(0)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  organization    Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workflowVersion WorkflowVersion         @relation(fields: [workflowVersionId], references: [id], onDelete: Restrict)
+  steps           WorkflowStepExecution[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+  @@index([workflowVersionId])
+  @@index([triggerEventId])
+  @@index([organizationId])
+}
+
+/// 35. WorkflowStepExecution - execution trace of individual workflow actions
+model WorkflowStepExecution {
+  id          String     @id @default(uuid())
+  executionId String
+  stepIndex   Int
+  actionType  String
+  input       Json?
+  output      Json?
+  status      StepStatus @default(pending)
+  startedAt   DateTime?
+  completedAt DateTime?
+  error       String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  execution WorkflowExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@index([executionId, stepIndex])
+  @@index([executionId])
+}
+
+// ---------------------------------------------------------------------------
+// Event Bus & Reliability Models
+// ---------------------------------------------------------------------------
+
+/// 36. OutboxEvent - transactional outbox pattern for reliable async events
+model OutboxEvent {
+  id             String       @id @default(uuid())
+  organizationId String
+  eventType      String
+  entityType     String
+  entityId       String
+  payload        Json
+  status         OutboxStatus @default(pending)
+  idempotencyKey String       @unique
+  dispatchedAt   DateTime?
+  failureCount   Int          @default(0)
+  lastError      String?      @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+  @@index([organizationId])
+}
+
+/// 37. ProcessedEvent - idempotency log preventing duplicate event processing
+model ProcessedEvent {
+  id            String   @id @default(uuid())
+  eventId       String
+  processorName String
+  processedAt   DateTime @default(now())
+
+  @@unique([eventId, processorName])
+  @@index([eventId])
+}
+
+/// 38. ApprovalRequest - human-in-the-loop approval with optimistic concurrency
+model ApprovalRequest {
+  id              String         @id @default(uuid())
+  organizationId  String
+  approvalType    String
+  entityType      String
+  entityId        String
+  proposedPayload Json
+  status          ApprovalStatus @default(pending)
+  version         Int            @default(1)
+  requestedById   String
+  reviewedById    String?
+  reviewedAt      DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  requestedBy  User         @relation("ApprovalRequestedBy", fields: [requestedById], references: [id], onDelete: Restrict)
+  reviewedBy   User?        @relation("ApprovalReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([organizationId, entityType, entityId])
+  @@index([requestedById])
+  @@index([reviewedById])
+  @@index([organizationId])
+}
+
+// ---------------------------------------------------------------------------
+// System Notifications, Auditing & Ingestion
+// ---------------------------------------------------------------------------
+
+/// 39. Notification - user notifications with delivery status
+model Notification {
+  id               String   @id @default(uuid())
+  organizationId   String
+  userId           String
+  notificationType String
+  title            String
+  body             String?  @db.Text
+  deepLink         String?
+  isRead           Boolean  @default(false)
+  groupKey         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@index([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+/// 40. NotificationPreference - per-user notification routing configuration
+model NotificationPreference {
+  id               String   @id @default(uuid())
+  userId           String
+  organizationId   String
+  notificationType String
+  enabled          Boolean  @default(true)
+  channels         String[] @default(["in_app"])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId, notificationType])
+  @@index([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+/// 41. AuditLog - tamper-evident operational compliance log
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String?
+  action         String
+  entityType     String
+  entityId       String?
+  before         Json?
+  after          Json?
+  ipAddress      String?
+  userAgent      String?
+  requestId      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, entityType, entityId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+/// 42. ImportJob - bulk lead/contact import tracking
+model ImportJob {
+  id             String          @id @default(uuid())
+  organizationId String
+  filename       String
+  storageKey     String
+  status         ImportStatus    @default(pending)
+  totalRows      Int             @default(0)
+  processedRows  Int             @default(0)
+  successCount   Int             @default(0)
+  errorCount     Int             @default(0)
+  errorReportKey String?
+  createdById    String
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User             @relation("ImportJobCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  errors       ImportRowError[]
+
+  @@index([organizationId, status])
+  @@index([createdById])
+  @@index([organizationId])
+}
+
+/// 43. ImportRowError - detailed per-row validation failure tracking
+model ImportRowError {
+  id          String   @id @default(uuid())
+  importJobId String
+  rowNumber   Int
+  field       String?
+  error       String   @db.Text
+  rawData     Json?
+  createdAt   DateTime @default(now())
+
+  importJob ImportJob @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+
+  @@index([importJobId, rowNumber])
+  @@index([importJobId])
+}
+
+// ---------------------------------------------------------------------------
+// Billing & Quota Models
+// ---------------------------------------------------------------------------
+
+/// 44. UsageCounter - tenancy quota and rate limiting counters
+model UsageCounter {
+  id             String   @id @default(uuid())
+  organizationId String
+  metric         String
+  period         String
+  count          Int      @default(0)
+  limitValue     Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, metric, period])
+  @@index([organizationId])
+}
+
+/// 45. Subscription - organization billing plan and Stripe subscription mapping
+model Subscription {
+  id                     String             @id @default(uuid())
+  organizationId         String             @unique
+  planId                 String
+  status                 SubscriptionStatus @default(trialing)
+  providerSubscriptionId String?            @unique
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([providerSubscriptionId])
+}
+
+/// 46. BillingEvent - webhook event log from payment gateway (Stripe/Razorpay)
+model BillingEvent {
+  id                String    @id @default(uuid())
+  organizationId    String
+  providerEventId   String    @unique
+  eventType         String
+  payload           Json
+  processedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, eventType])
+  @@index([organizationId])
+}
