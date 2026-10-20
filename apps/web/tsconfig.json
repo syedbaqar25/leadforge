@@ -19,7 +19,6 @@
         "name": "next"
       }
     ],
-    "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"],
       "@leadforge/shared": ["../../packages/shared/src/index.ts"]
