@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 
-describe('OrganizationsService — Multi-Tenancy & Membership Controls (PART 1.2 & PART 2)', () => {
+describe('OrganizationsService — Multi-Tenancy & Membership Controls', () => {
   let orgsService: OrganizationsService;
   let mockPrisma: any;
   let mockEmailService: any;
@@ -152,7 +152,7 @@ describe('OrganizationsService — Multi-Tenancy & Membership Controls (PART 1.2
     });
   });
 
-  describe('Ownership Safeguards (PART 1.2)', () => {
+  describe('Ownership Safeguards', () => {
     it('prevents demoting the last remaining organization owner', async () => {
       mockPrisma.client.membership.findFirst.mockResolvedValue(mockMember);
       mockPrisma.client.membership.count.mockResolvedValue(1); // Only 1 owner exists

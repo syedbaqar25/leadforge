@@ -2,7 +2,7 @@ import { DealsService } from '../src/modules/deals/deals.service';
 import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
-describe('DealsService — Pipeline & Deal Tracking (PART 12 Phase 5)', () => {
+describe('DealsService — Pipeline & Deal Tracking', () => {
   let dealsService: DealsService;
   let mockPrisma: any;
   let mockAuditService: any;

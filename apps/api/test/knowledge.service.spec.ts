@@ -4,7 +4,7 @@ import { chunkDocumentText } from '../src/modules/knowledge/chunking';
 import { validateUploadedFile } from '../src/common/security/file-validation';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
-describe('KnowledgeService — RAG Pipeline & Vector Search (PART 1.3, 1.8 & PART 12 Phase 9)', () => {
+describe('KnowledgeService — RAG Pipeline & Vector Search', () => {
   let knowledgeService: KnowledgeService;
   let embeddingService: EmbeddingService;
   let mockPrisma: any;
@@ -53,7 +53,7 @@ describe('KnowledgeService — RAG Pipeline & Vector Search (PART 1.3, 1.8 & PAR
     knowledgeService = new KnowledgeService(mockPrisma, mockAuditService, embeddingService);
   });
 
-  describe('File Upload Security & Magic Byte Validation (PART 1.3)', () => {
+  describe('File Upload Security & Magic Byte Validation', () => {
     it('accepts valid Markdown and text files with permitted extensions', () => {
       const validTextFile = {
         originalname: 'playbook.md',
@@ -231,7 +231,7 @@ describe('KnowledgeService — RAG Pipeline & Vector Search (PART 1.3, 1.8 & PAR
     });
   });
 
-  describe('Semantic Vector Search & Grounded Q&A (PART 1.8)', () => {
+  describe('Semantic Vector Search & Grounded Q&A', () => {
     it('executes parameterized SQL vector similarity search strictly scoped to tenant', async () => {
       const mockRetrievedChunks = [
         {

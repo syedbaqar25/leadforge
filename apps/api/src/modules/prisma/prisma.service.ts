@@ -94,7 +94,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   /**
    * Returns a tenant-scoped Prisma client extension.
-   * Central enforcement of organizationId on all tenant models per PART 1.2.
+   * Central enforcement of organizationId on all tenant models.
    * If organizationId is present in AsyncLocalStorage, it automatically:
    * 1. Injects `organizationId` into `where` clause for reads, updates, deletes.
    * 2. Injects `organizationId` into `data` for creates.

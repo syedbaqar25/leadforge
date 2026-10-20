@@ -1,7 +1,7 @@
 import { PrismaService, TENANT_SCOPED_MODELS } from '../src/modules/prisma/prisma.service';
 import { tenantStorage, type TenantContext } from '../src/common/tenant/tenant.context';
 
-describe('Tenant Isolation & IDOR / BOLA Prevention (PART 1.2)', () => {
+describe('Tenant Isolation & IDOR / BOLA Prevention', () => {
   let prismaService: PrismaService;
 
   beforeEach(() => {

@@ -221,7 +221,7 @@ export default function SettingsPage() {
                 <CardTitle className="text-base">Team Members & RBAC</CardTitle>
               </div>
               <p className="text-xs text-foreground-secondary mt-0.5">
-                Role-based access permissions enforcing tenant isolation (PART 1.2)
+                Role-based access permissions enforcing tenant isolation
               </p>
             </div>
             <Button

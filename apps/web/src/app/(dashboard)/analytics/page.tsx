@@ -209,7 +209,7 @@ export default function AnalyticsReportingPage() {
               <CardTitle className="text-base">AI Token Accounting & Budget Ledger</CardTitle>
             </div>
             <p className="text-xs text-foreground-secondary mt-0.5">
-              Audit log of OpenAI tokens consumed and estimated API costs (PART 1.8)
+              Audit log of OpenAI tokens consumed and estimated API costs
             </p>
           </div>
           <Badge variant="outline">Period: {aiAnalytics?.currentPeriod || '2026-10'}</Badge>

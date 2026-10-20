@@ -2,7 +2,7 @@ import { AiService } from '../src/modules/ai/ai.service';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
-describe('AiService — AI Sales Assistant & Lead Intelligence (PART 1.8 & PART 12 Phase 6)', () => {
+describe('AiService — AI Sales Assistant & Lead Intelligence', () => {
   let aiService: AiService;
   let mockPrisma: any;
   let mockAuditService: any;

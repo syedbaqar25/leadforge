@@ -1,6 +1,6 @@
 import { RateLimitService } from '../src/modules/rate-limit/rate-limit.service';
 
-describe('RateLimitService Sliding Window Matrix (PART 8)', () => {
+describe('RateLimitService Sliding Window Matrix', () => {
   let service: RateLimitService;
 
   beforeEach(async () => {

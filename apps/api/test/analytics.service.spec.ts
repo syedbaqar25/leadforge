@@ -2,7 +2,7 @@ import { AnalyticsService } from '../src/modules/analytics/analytics.service';
 import { AuditService } from '../src/modules/audit/audit.service';
 import { escapeCsvCell, generateCsv } from '../src/common/security/csv-export';
 
-describe('Analytics & Audit Logs Engine (PART 1.3, 1.8 & PART 12 Phase 10)', () => {
+describe('Analytics & Audit Logs Engine', () => {
   let analyticsService: AnalyticsService;
   let auditService: AuditService;
   let mockPrisma: any;
@@ -43,7 +43,7 @@ describe('Analytics & Audit Logs Engine (PART 1.3, 1.8 & PART 12 Phase 10)', () 
     auditService = new AuditService(mockPrisma);
   });
 
-  describe('CSV Formula Injection Defense (CWE-1236 & PART 1.3)', () => {
+  describe('CSV Formula Injection Defense (CWE-1236)', () => {
     it('neutralizes cells starting with = by prepending a single quote', () => {
       const maliciousCell = '=SUM(A1:A10)';
       const escaped = escapeCsvCell(maliciousCell);

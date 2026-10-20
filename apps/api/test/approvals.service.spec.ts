@@ -1,7 +1,7 @@
 import { ApprovalsService } from '../src/modules/approvals/approvals.service';
 import { NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 
-describe('ApprovalsService — Human-in-the-Loop Approval Engine (PART 1.8 & PART 12 Phase 6)', () => {
+describe('ApprovalsService — Human-in-the-Loop Approval Engine', () => {
   let approvalsService: ApprovalsService;
   let mockPrisma: any;
   let mockAuditService: any;

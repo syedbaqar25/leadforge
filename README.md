@@ -152,10 +152,7 @@ leadforge/
 │   └── Dockerfile.worker        # Multi-stage production build for BullMQ worker
 ├── docs/
 │   ├── DECISIONS.md             # Architecture Decision Records (ADRs)
-│   ├── DESIGN_SYSTEM.md         # Editorial Paper design tokens and UI architecture
-│   ├── PROGRESS.md              # Project milestone tracking and implementation progress
-│   ├── KNOWN_GAPS.md            # Deferred features, gaps, and feature flags
-│   └── GITHUB_SETUP.md          # Security hardening and GitHub public release guide
+│   └── DESIGN_SYSTEM.md         # Editorial Paper design tokens and UI architecture
 ├── packages/
 │   ├── db/                      # Prisma schema, migrations, and database client
 │   └── shared/                  # Common TypeScript interfaces, DTOs, and utility functions
@@ -171,11 +168,8 @@ leadforge/
 
 ## Documentation & Architecture
 
-- **Architecture Decisions**: See [docs/DECISIONS.md](docs/DECISIONS.md) for rationale on monorepo structure, NestJS modular monolith, Prisma + pgvector, BullMQ, and cookie auth.
-- **Design Guidelines**: See [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) for the Editorial Paper design tokens, typography rules (`Playfair Display` + `Source Sans 3`), geometry (`rounded-[6px]`), and prohibited SaaS tropes.
-- **Deferred Items & Flags**: See [docs/KNOWN_GAPS.md](docs/KNOWN_GAPS.md) for intentionally deferred features (WhatsApp, Billing, Dark Mode, RAG).
-- **Milestones**: See [docs/PROGRESS.md](docs/PROGRESS.md) for current implementation progress across phases.
-- **Release Preparation**: See [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md) for repository security hardening, secret scanning, and branch protection setup.
+- **Architecture Decisions**: See [docs/DECISIONS.md](docs/DECISIONS.md) for rationale on monorepo structure, NestJS modular monolith, Prisma + pgvector, BullMQ, and cookie authentication.
+- **Design System**: See [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) for the Editorial Paper design tokens, typography rules (`Playfair Display` + `Source Sans 3`), geometry (`rounded-[6px]`), and accessible UI patterns.
 
 ---
 

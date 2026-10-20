@@ -2,7 +2,7 @@ import { ScoringService } from '../src/modules/scoring/scoring.service';
 import { NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
-describe('ScoringService — Lead Prioritization & Explainable Scoring (PART 4)', () => {
+describe('ScoringService — Lead Prioritization & Explainable Scoring', () => {
   let scoringService: ScoringService;
   let mockPrisma: any;
   let mockAuditService: any;

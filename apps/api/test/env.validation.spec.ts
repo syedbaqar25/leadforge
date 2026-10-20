@@ -1,6 +1,6 @@
 import { envSchema } from '../src/config/env.validation';
 
-describe('Environment Configuration Validation (PART 1.1)', () => {
+describe('Environment Configuration Validation', () => {
   const baseValidEnv = {
     NODE_ENV: 'development',
     API_PORT: 4000,

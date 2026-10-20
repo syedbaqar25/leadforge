@@ -3,7 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { encryptAesGcm, decryptAesGcm } from '../src/common/crypto/encryption';
 import * as crypto from 'crypto';
 
-describe('CommunicationsService — Omnichannel Messaging & Compliance (PART 1.8 & PART 12 Phase 7)', () => {
+describe('CommunicationsService — Omnichannel Messaging & Compliance', () => {
   let commsService: CommunicationsService;
   let mockPrisma: any;
   let mockAuditService: any;

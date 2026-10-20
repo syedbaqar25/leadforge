@@ -23,7 +23,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 /**
  * Validates file upload against MIME allowlist, extension allowlist,
- * file size caps, and magic byte signatures (PART 1.3).
+ * file size caps, and magic byte signatures.
  */
 export function validateUploadedFile(
   file:

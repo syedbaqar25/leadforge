@@ -2,7 +2,7 @@ import { WorkflowsService } from '../src/modules/workflows/workflows.service';
 import { validateSafeUrl } from '../src/common/security/ssrf';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
-describe('WorkflowsService — Workflow Automation Engine (PART 1.2, 1.3 & PART 12 Phase 8)', () => {
+describe('WorkflowsService — Workflow Automation Engine', () => {
   let workflowsService: WorkflowsService;
   let mockPrisma: any;
   let mockAuditService: any;
@@ -359,7 +359,7 @@ describe('WorkflowsService — Workflow Automation Engine (PART 1.2, 1.3 & PART 
     });
   });
 
-  describe('SSRF Protection (PART 1.3)', () => {
+  describe('SSRF Protection', () => {
     it('rejects AWS/GCP cloud metadata link-local endpoints (169.254.169.254)', async () => {
       await expect(validateSafeUrl('http://169.254.169.254/latest/meta-data/')).rejects.toThrow(
         BadRequestException,

@@ -1,5 +1,5 @@
 /**
- * Named rate limit policies per PART 8 specification.
+ * Named rate limit policies.
  * Each route can declare its named policy using @RateLimit('auth_login'), etc.
  */
 export interface RateLimitPolicy {

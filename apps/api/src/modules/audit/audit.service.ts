@@ -116,7 +116,7 @@ export class AuditService {
   }
 
   /**
-   * Export audit logs to CSV with formula injection defense (PART 1.3).
+   * Export audit logs to CSV with formula injection defense.
    * Neutralizes formula triggers (=, +, -, @) and wraps fields safely.
    */
   async exportAuditLogsCsv(orgId: string, action?: string, entityType?: string): Promise<string> {

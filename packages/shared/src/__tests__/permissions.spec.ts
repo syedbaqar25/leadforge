@@ -1,7 +1,7 @@
 import { hasPermission, getPermissionsForRole, PERMISSIONS } from '../permissions';
 import { emailSchema, passwordSchema, paginationSchema } from '../schemas';
 
-describe('Shared RBAC Permissions Map (PART 2 & PART 5)', () => {
+describe('Shared RBAC Permissions Map', () => {
   it('correctly grants owner all permissions', () => {
     expect(hasPermission('owner', 'lead:delete')).toBe(true);
     expect(hasPermission('owner', 'org:billing')).toBe(true);
@@ -35,7 +35,7 @@ describe('Shared RBAC Permissions Map (PART 2 & PART 5)', () => {
   });
 });
 
-describe('Shared Zod Schemas Validation (PART 1.3)', () => {
+describe('Shared Zod Schemas Validation', () => {
   it('normalizes email addresses to lowercase and trims whitespace', () => {
     const parsed = emailSchema.parse('  User.Name@Example.COM  ');
     expect(parsed).toBe('user.name@example.com');

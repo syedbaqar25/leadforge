@@ -6,7 +6,7 @@ import {
   type TenantContext,
 } from '../src/common/tenant/tenant.context';
 
-describe('TenantContext & AsyncLocalStorage Isolation (PART 1.2)', () => {
+describe('TenantContext & AsyncLocalStorage Isolation', () => {
   it('throws an error when accessed outside an active request context', () => {
     expect(() => getTenantContext()).toThrow(
       'TenantContext not available — this code is running outside an authenticated request lifecycle',

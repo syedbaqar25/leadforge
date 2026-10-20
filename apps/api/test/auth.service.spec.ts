@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-describe('AuthService — Multi-Tenant Authentication & Session Security (PART 1.4 & PART 2)', () => {
+describe('AuthService — Multi-Tenant Authentication & Session Security', () => {
   let authService: AuthService;
   let mockPrisma: any;
   let mockEmailService: any;
@@ -170,7 +170,7 @@ describe('AuthService — Multi-Tenant Authentication & Session Security (PART 1
     });
   });
 
-  describe('Login & Account Lockout Policy (PART 1.4 & PART 8)', () => {
+  describe('Login & Account Lockout Policy', () => {
     it('authenticates user and returns tokens with session', async () => {
       mockPrisma.client.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.client.user.update.mockResolvedValue(mockUser);
@@ -220,7 +220,7 @@ describe('AuthService — Multi-Tenant Authentication & Session Security (PART 1
     });
   });
 
-  describe('Refresh Token Rotation & Reuse Detection (PART 1.4)', () => {
+  describe('Refresh Token Rotation & Reuse Detection', () => {
     it('successfully rotates refresh token and extends session', async () => {
       const activeSession = {
         id: 'sess-active-1',

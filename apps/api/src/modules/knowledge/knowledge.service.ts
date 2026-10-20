@@ -131,7 +131,7 @@ export class KnowledgeService {
   }
 
   /**
-   * Upload binary or text document with strict security validation (PART 1.3).
+   * Upload binary or text document with strict security validation.
    */
   async uploadDocument(orgId: string, userId: string | null, file: Express.Multer.File) {
     // 1. Validate file (MIME, extension, size, magic bytes)
@@ -271,7 +271,7 @@ export class KnowledgeService {
   }
 
   // =========================================================================
-  // SEMANTIC VECTOR SEARCH (PART 1.3 & PART 12 Phase 9)
+  // SEMANTIC VECTOR SEARCH WITH PGVECTOR
   // =========================================================================
 
   /**
@@ -309,7 +309,7 @@ export class KnowledgeService {
   }
 
   // =========================================================================
-  // GROUNDED AI Q&A WITH SOURCE ATTRIBUTION (PART 1.8)
+  // GROUNDED AI Q&A WITH SOURCE ATTRIBUTION
   // =========================================================================
 
   /**

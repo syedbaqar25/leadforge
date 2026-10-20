@@ -2,7 +2,7 @@ import { LeadsService } from '../src/modules/leads/leads.service';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
-describe('LeadsService — Lead Intelligence, Deduplication & Tenant Isolation (PART 1.2 & PART 3)', () => {
+describe('LeadsService — Lead Intelligence, Deduplication & Tenant Isolation', () => {
   let leadsService: LeadsService;
   let mockPrisma: any;
   let mockAuditService: any;
@@ -179,7 +179,7 @@ describe('LeadsService — Lead Intelligence, Deduplication & Tenant Isolation (
     });
   });
 
-  describe('Tenant Scoping & IDOR / BOLA Prevention (PART 1.2)', () => {
+  describe('Tenant Scoping & IDOR / BOLA Prevention', () => {
     it('returns 404 (NotFoundException) when lead ID does not exist in the caller organization', async () => {
       // Cross-tenant ID query returns null
       mockPrisma.client.lead.findFirst.mockResolvedValue(null);

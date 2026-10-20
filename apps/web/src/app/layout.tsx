@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Leadforge — AI Lead Intelligence & Sales Automation Platform',
   description:
     'A multi-tenant CRM, AI sales assistant, and workflow automation engine for high-performing sales teams.',
-  // Explicitly no default icon until user supplies brand asset per PART 16.2
+  // Custom brand favicon and logo assets will be configured here
   icons: {
     icon: [],
   },

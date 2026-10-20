@@ -252,7 +252,7 @@ export class LeadsService {
 
   /**
    * Get single lead by ID with complete relations.
-   * Throws 404 for cross-tenant IDs to prevent existence enumeration (PART 1.2).
+   * Throws 404 for cross-tenant IDs to prevent existence enumeration.
    */
   async getLeadById(orgId: string, leadId: string) {
     const lead = await this.prisma.client.lead.findFirst({

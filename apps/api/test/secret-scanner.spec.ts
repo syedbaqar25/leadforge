@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-describe('Pre-commit Secret Scanner Gate (PART 1.1)', () => {
+describe('Pre-commit Secret Scanner Gate', () => {
   const tempDir = path.join(__dirname, 'fixtures');
   const cleanFilePath = path.join(tempDir, 'clean-file.ts');
   const dirtyFilePath = path.join(tempDir, 'leaked-secret.ts');
