@@ -5,6 +5,10 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { RateLimitModule } from './modules/rate-limit/rate-limit.module';
 import { RateLimitGuard } from './modules/rate-limit/rate-limit.guard';
 import { HealthModule } from './modules/health/health.module';
+import { EmailModule } from './modules/email/email.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { TenantContextMiddleware } from './common/tenant/tenant-context.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RbacGuard } from './common/guards/rbac.guard';
@@ -12,7 +16,16 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 @Module({
-  imports: [AppConfigModule, PrismaModule, RateLimitModule, HealthModule],
+  imports: [
+    AppConfigModule,
+    PrismaModule,
+    RateLimitModule,
+    HealthModule,
+    EmailModule,
+    AuditModule,
+    AuthModule,
+    OrganizationsModule,
+  ],
   providers: [
     // 1. Global Rate Limit Guard
     {
