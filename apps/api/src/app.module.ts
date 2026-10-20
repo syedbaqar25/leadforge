@@ -9,6 +9,7 @@ import { EmailModule } from './modules/email/email.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { LeadsModule } from './modules/leads/leads.module';
 import { TenantContextMiddleware } from './common/tenant/tenant-context.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RbacGuard } from './common/guards/rbac.guard';
@@ -25,6 +26,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     AuditModule,
     AuthModule,
     OrganizationsModule,
+    LeadsModule,
   ],
   providers: [
     // 1. Global Rate Limit Guard
