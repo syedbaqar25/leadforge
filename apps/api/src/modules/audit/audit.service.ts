@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { getTenantContext } from '../../common/tenant/tenant.context';
+import { generateCsv } from '../../common/security/csv-export';
+import { AuditLogQueryDto } from './dto/audit-log-query.dto';
+import { Prisma } from '@prisma/client';
 
 export interface AuditLogParams {
   organizationId?: string | undefined;
@@ -45,7 +48,6 @@ export class AuditService {
       const userAgent = params.userAgent || tenantCtx?.userAgent || null;
       const requestId = params.requestId || tenantCtx?.requestId || null;
 
-      // Note: Cast to Prisma Json to avoid typing issues with nested structures
       await this.prisma.client.auditLog.create({
         data: {
           organizationId,
@@ -64,5 +66,97 @@ export class AuditService {
       // Audit log failures should never crash primary transactions, but must be logged
       this.logger.error(`Failed to write audit log [${params.action}]: ${err.message}`, err.stack);
     }
+  }
+
+  /**
+   * List paginated audit logs scoped strictly to the caller's organization.
+   */
+  async getAuditLogs(orgId: string, query: AuditLogQueryDto) {
+    const page = query.page && query.page > 0 ? query.page : 1;
+    const pageSize =
+      query.pageSize && query.pageSize > 0 && query.pageSize <= 100 ? query.pageSize : 25;
+    const skip = (page - 1) * pageSize;
+
+    const where: Prisma.AuditLogWhereInput = {
+      organizationId: orgId,
+    };
+
+    if (query.action) {
+      where.action = { contains: query.action.trim(), mode: 'insensitive' };
+    }
+
+    if (query.entityType) {
+      where.entityType = query.entityType.trim();
+    }
+
+    if (query.userId) {
+      where.userId = query.userId.trim();
+    }
+
+    const [logs, total] = await Promise.all([
+      this.prisma.client.auditLog.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.client.auditLog.count({ where }),
+    ]);
+
+    return {
+      data: logs,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        hasMore: page * pageSize < total,
+      },
+    };
+  }
+
+  /**
+   * Export audit logs to CSV with formula injection defense (PART 1.3).
+   * Neutralizes formula triggers (=, +, -, @) and wraps fields safely.
+   */
+  async exportAuditLogsCsv(orgId: string, action?: string, entityType?: string): Promise<string> {
+    const where: Prisma.AuditLogWhereInput = {
+      organizationId: orgId,
+    };
+
+    if (action) {
+      where.action = action.trim();
+    }
+    if (entityType) {
+      where.entityType = entityType.trim();
+    }
+
+    const logs = await this.prisma.client.auditLog.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: 5000, // Maximum export cap
+    });
+
+    const headers = [
+      'Log ID',
+      'Action',
+      'Entity Type',
+      'Entity ID',
+      'User ID',
+      'IP Address',
+      'Timestamp (UTC)',
+    ];
+
+    const rows = logs.map((log) => [
+      log.id,
+      log.action,
+      log.entityType,
+      log.entityId || '',
+      log.userId || '',
+      log.ipAddress || '',
+      log.createdAt.toISOString(),
+    ]);
+
+    return generateCsv(headers, rows);
   }
 }
