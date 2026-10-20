@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { ScoringModule } from './modules/scoring/scoring.module';
+import { DealsModule } from './modules/deals/deals.module';
 import { TenantContextMiddleware } from './common/tenant/tenant-context.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RbacGuard } from './common/guards/rbac.guard';
@@ -29,6 +30,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     OrganizationsModule,
     LeadsModule,
     ScoringModule,
+    DealsModule,
   ],
   providers: [
     // 1. Global Rate Limit Guard

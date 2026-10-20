@@ -20,6 +20,7 @@ export const PERMISSIONS = {
   'deal:update:own': ['owner', 'admin', 'sales_manager', 'salesperson'],
   'deal:update:any': ['owner', 'admin', 'sales_manager'],
   'deal:delete': ['owner', 'admin'],
+  'pipeline:view': ['owner', 'admin', 'sales_manager', 'salesperson'],
   'pipeline:manage': ['owner', 'admin'],
 
   // Tasks
