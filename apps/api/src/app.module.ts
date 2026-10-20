@@ -16,6 +16,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { CommunicationsModule } from './modules/communications/communications.module';
 import { WorkflowsModule } from './modules/workflows/workflows.module';
+import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 import { TenantContextMiddleware } from './common/tenant/tenant-context.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RbacGuard } from './common/guards/rbac.guard';
@@ -39,6 +40,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     ApprovalsModule,
     CommunicationsModule,
     WorkflowsModule,
+    KnowledgeModule,
   ],
   providers: [
     // 1. Global Rate Limit Guard
